@@ -16,13 +16,20 @@ test suite and no package manager. Occasional scripts may be added under
 | Path | Contents |
 |---|---|
 | `docs/` | Setup runbooks and technical guides (English) |
+| `tasks/` | Ordered installation/setup work items with status (English) |
 | `curriculum/` | Subject plans and lesson sequences (Ukrainian) |
 | `decks/` | Anki deck sources and card drafts (Ukrainian) |
 | `logs/` | Session logs and progress notes |
 | `scripts/` | Any automation (deck generation, exports) |
 
-Only `docs/` exists today. Create the others as needed rather than up front;
-do not scatter content at the repository root.
+Only `docs/` and `tasks/` exist today. Create the others as needed rather
+than up front; do not scatter content at the repository root.
+
+`tasks/` is the execution side of `docs/`. Each task file carries a status, a
+**Done when** checklist and a **Record** table of what the machine actually
+did; `tasks/12-doc-feedback.md` is how those observations get folded back into
+the guides, including the claims still marked unverified. Start at
+`tasks/README.md`.
 
 ## Language policy
 
