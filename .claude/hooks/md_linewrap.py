@@ -15,8 +15,14 @@ import sys
 
 LIMIT = 80
 
-# Exempt the same things .markdownlint-cli2.jsonc exempts, so the hook and
-# `npm run lint` never disagree about whether a file is clean.
+# Exempt the same constructs .markdownlint-cli2.jsonc exempts. One difference
+# remains and it is deliberate: markdownlint's MD013 only reports a long line
+# when there is whitespace past the limit, i.e. when the line could actually be
+# broken. This hook reports any prose line over the limit, including one that
+# runs long only because its last word straddles column 80 — that word can be
+# moved down, and the convention says hard wrap. So the hook is the stricter of
+# the two, and `npm run lint` staying green does not mean the hook will be
+# quiet.
 TABLE = re.compile(r"^\s*\|")
 HEADING = re.compile(r"^#")
 BARE_URL = re.compile(r"^\s*(https?|ftp)://")
