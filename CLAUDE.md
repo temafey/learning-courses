@@ -1,5 +1,6 @@
 # CLAUDE.md
 
+<!-- markdownlint-disable-next-line MD013 -->
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What this is
@@ -67,3 +68,15 @@ The environment the docs describe, so it does not have to be re-derived:
 
 Everything runs on localhost. When a doc suggests exposing a service beyond
 loopback, call out the firewall and binding implications explicitly.
+
+## Repository
+
+Git repo, remote `git@github.com:temafey/learning-courses.git`, default branch
+`main`. Working files live under OneDrive, so a file may already have been
+changed on disk by sync — check `git status` before assuming the tree is clean.
+
+Run `npm run lint` before committing docs. `markdownlint-cli2` enforces the
+80-column rule (tables, code blocks and headings exempt) plus heading and
+fenced-block hygiene. A `PostToolUse` hook reports over-length lines during
+editing; `<!-- markdownlint-disable-next-line MD013 -->` suppresses both for a
+single line.

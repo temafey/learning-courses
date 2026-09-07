@@ -12,6 +12,8 @@ esac
 [ -f "$f" ] || exit 0
 
 awk '
+  /^[ 	]*<!--[ 	]*markdownlint-disable-next-line/ { skip = 1; next }
+  skip { skip = 0; next }
   /^```/ { fence = !fence; next }
   fence { next }
   /^[ \t]*\|/ { next }

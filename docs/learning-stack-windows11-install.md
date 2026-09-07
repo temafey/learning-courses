@@ -260,7 +260,7 @@ Set the response style to **Learning**.
 
 Project instructions:
 
-```
+```text
 You are a tutor for a 7th-grade student (Ukrainian curriculum).
 Language: Ukrainian.
 

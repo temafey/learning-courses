@@ -1,0 +1,23 @@
+{
+  "globs": ["**/*.md"],
+  "ignores": ["node_modules/**", ".claude/skills/**"],
+  "config": {
+    // Prose is hard-wrapped at 80 columns; tables, code blocks and long URLs
+    // are exempt. The PostToolUse hook in .claude/ enforces the same rule
+    // during editing.
+    "MD013": {
+      "line_length": 80,
+      "tables": false,
+      "code_blocks": false,
+      "headings": false
+    },
+    // The house style uses numbered sections that repeat sub-headings such as
+    // "Verify" and "Install" under different parents.
+    "MD024": { "siblings_only": true },
+    // Documents open with an H1 title followed by a lead paragraph, not a
+    // heading; and inline HTML is not used.
+    "MD041": true,
+    // Emphasis is used for status words such as *unverified* in fact tables.
+    "MD036": false
+  }
+}

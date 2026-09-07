@@ -1,0 +1,11 @@
+{
+  "name": "learning-courses",
+  "private": true,
+  "description": "Content repository for a local, offline-capable home learning stack",
+  "scripts": {
+    "lint": "markdownlint-cli2 \"**/*.md\""
+  },
+  "devDependencies": {
+    "markdownlint-cli2": "^0.18.1"
+  }
+}
