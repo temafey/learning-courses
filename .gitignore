@@ -19,3 +19,5 @@ kolibri-data/
 .vscode/
 .idea/
 node_modules/
+
+.claude/skills/new-doc-workspace/

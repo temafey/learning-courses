@@ -1,0 +1,26 @@
+{
+  "skill_name": "new-doc",
+  "evals": [
+    {
+      "id": 0,
+      "name": "offline-channel-transfer",
+      "prompt": "write up a guide for getting kolibri channels onto the desktop when it has no internet - i'd download on my laptop and move them over by usb",
+      "expected_output": "A markdown doc in house style: numbered ## sections from 0, --- separators, per-step verification, troubleshooting table, and a dated verification status table marking unverified claims.",
+      "files": []
+    },
+    {
+      "id": 1,
+      "name": "backup-runbook",
+      "prompt": "i need a runbook for backing up the anki collection and the kolibri database to the external drive, something i can follow at the start of each school year",
+      "expected_output": "A markdown runbook in house style covering both data stores, with verification after each step and a dated fact table.",
+      "files": []
+    },
+    {
+      "id": 2,
+      "name": "second-learner-setup",
+      "prompt": "document how to add a second kid to kolibri as their own learner with separate progress tracking",
+      "expected_output": "A markdown doc in house style covering Kolibri learner/facility setup with verification steps and a dated fact table.",
+      "files": []
+    }
+  ]
+}
