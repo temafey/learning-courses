@@ -169,15 +169,16 @@ Two Windows-specific notes:
 
 - A firewall prompt may appear on Anki startup, because AnkiConnect runs a local
   HTTP server. Anki must be unblocked for the add-on to function.
-- **Anki must stay running in the background.** If Anki is closed, every MCP tool
-  call fails with a connection error. Add Anki to Startup Apps if the child will
-  use this daily.
+- **Anki must stay running in the background.** If Anki is closed, every MCP
+  tool call fails with a connection error. Add Anki to Startup Apps if the
+  child will use this daily.
 
 ### 3.4 Security posture (leave as default)
 
 By default AnkiConnect binds only to `127.0.0.1`, so it is reachable only from
 this machine. The binding address can be changed via
-`Tools → Add-ons → AnkiConnect → Config` (`webBindAddress`). **Do not change it.**
+`Tools → Add-ons → AnkiConnect → Config` (`webBindAddress`).
+**Do not change it.**
 There is no authentication on this API by default; exposing it to the LAN gives
 anyone on the network full write access to the collection.
 
@@ -265,8 +266,8 @@ If it returns an error, work through §7.
 
 ## 5. Claude Desktop project setup
 
-Create one Project per subject. Attach the textbook PDF to the project knowledge.
-Set the response style to **Learning**.
+Create one Project per subject. Attach the textbook PDF to the project
+knowledge. Set the response style to **Learning**.
 
 Project instructions:
 
@@ -318,8 +319,9 @@ Ask Claude directly for retention analysis:
 > Show review stats for School::Algebra over the last 30 days. Which cards is
 > he failing repeatedly?
 
-Cards failing repeatedly are not a memory problem — they signal a concept that
-was never understood. Those go back into a teaching session, not more repetition.
+Cards failing repeatedly are not a memory problem — they signal a concept
+that was never understood. Those go back into a teaching session, not more
+repetition.
 
 ---
 
