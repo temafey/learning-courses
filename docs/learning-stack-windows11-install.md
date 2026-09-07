@@ -27,7 +27,7 @@ Person(parent, "Parent", "Sets up, reviews progress")
 
 System_Boundary(win, "Windows 11 workstation") {
   Container(claude, "Claude Desktop", "Electron", "Tutor sessions, card generation")
-  Container(mcp, "Anki MCP Server", "Node.js 24 LTS", "42 MCP tools, STDIO transport")
+  Container(mcp, "Anki MCP Server", "Node.js 24 LTS", "50 MCP tools, STDIO transport")
   Container(anki, "Anki Desktop", "Qt/Python", "Spaced repetition engine (FSRS)")
   Container(ankiconnect, "AnkiConnect add-on", "Python", "Local HTTP API, port 8765")
   Container(kolibri, "Kolibri", "Django + bundled Python 3", "Content library, port 8080")
@@ -85,7 +85,7 @@ its own Python 3.
 ### 2.1 Install
 
 1. Download the Windows installer from `learningequality.org` (current
-   documented release line: **0.19**).
+   release: **0.19.5**, published 2026-07-14).
 2. Run the `.exe`. Select the installation language.
 3. The installer includes Python 3 — confirm the install/upgrade when prompted.
 4. Complete the setup wizard.
@@ -114,7 +114,8 @@ Recommended channels for this use case:
 
 - **Khan Academy** — math, physics, chemistry (check for Ukrainian/Russian
   localized variants; coverage varies by subject)
-- **OpenStax** — openly licensed textbooks
+- **Open Stax** — openly licensed textbooks (spelled as two words in the
+  channel catalogue)
 - **CK-12** — STEM exercises
 - **Blockly Games** — programming introduction
 - **EngageNY** — math curriculum sequences
@@ -141,8 +142,17 @@ Download Anki desktop for Windows from `apps.ankiweb.net` and install with
 defaults. Create a local profile. AnkiWeb sync is optional and not required by
 anything in this guide.
 
-Enable **FSRS** in `Tools → Preferences → Review` (modern scheduler; better
-interval prediction than the legacy SM-2 algorithm).
+Enable **FSRS** in the deck options: open any deck's options and switch it on
+in the **FSRS** section at the bottom of that page. The setting is shared by all
+presets, so enabling it once covers every deck. FSRS is the modern scheduler and
+predicts intervals better than the legacy SM-2 algorithm. It needs Anki 23.10 or
+newer on every client the collection syncs with.
+
+> **Corrected 2026-09-07.** Earlier revisions of this guide put the FSRS toggle
+> in `Tools → Preferences → Review`. It is not there — that tab holds only
+> "Next day starts at", "Learn ahead limit", "Timebox time limit" and display
+> options. If you followed the old instruction and could not find FSRS, this is
+> why; the setting lives in deck options.
 
 ### 3.2 Install AnkiConnect
 
@@ -153,7 +163,7 @@ interval prediction than the legacy SM-2 algorithm).
 ### 3.3 Verify
 
 Open `http://localhost:8765` in a browser. If the add-on is running you will see
-the text `AnkiConnect` in the window. Nothing else is needed.
+the message `Anki-Connect` in the window. Nothing else is needed.
 
 Two Windows-specific notes:
 
@@ -334,25 +344,38 @@ per-server log file).
 
 ## 8. Verification status of the facts in this guide
 
-Written 2026-09-07. Anything marked *unverified* should be checked against the
-source before relying on it.
+Re-verified 2026-09-07 against upstream sources. Anything marked *unverified*
+should be checked against the source before relying on it.
 
 | Claim | Status |
 |---|---|
-| AnkiConnect add-on code `2055492159`, port 8765, verify via `localhost:8765` | Verified — project README |
-| AnkiConnect binds `127.0.0.1` by default; `webBindAddress` in add-on config | Verified — project README |
-| Windows firewall prompt for AnkiConnect's HTTP server | Verified — project README |
-| MCP server requires Node.js ≥ 22.12.0; Node 20 EOL 2026-04-30 | Verified — project README |
-| MCPB install route, `%APPDATA%\Claude\claude_desktop_config.json`, npx config shape, `--read-only`, 42 tools | Verified — project README |
-| Note-update failure when the note is open in the Browser | Verified — project README, listed as a critical limitation |
-| MCP server runs locally, no telemetry | Verified — project privacy policy |
-| Kolibri Windows `.exe` bundles Python 3, serves `127.0.0.1:8080`, firewall prompt | Verified — Kolibri user guide |
-| Kolibri release line 0.19 | Verified as of the current docs; may have advanced |
-| Kolibri channel list (Khan Academy, OpenStax, CK-12, Blockly Games, EngageNY) | Verified for the English channel set; **localized coverage unverified** |
-| Node 24.x is the current Active LTS | Verified — nodejs.org release list |
-| Windows log path `%APPDATA%\Claude\logs\` | **Unverified** — inferred from the documented macOS path |
-| FSRS toggle location in Anki Preferences | **Unverified** — menu wording varies across Anki releases |
+| AnkiConnect add-on code `2055492159`, port 8765, `localhost:8765` shows `Anki-Connect` | Verified — AnkiConnect README |
+| AnkiConnect binds `127.0.0.1` by default; `webBindAddress` in `Tools → Add-ons → AnkiConnect → Config` | Verified — AnkiConnect README |
+| Windows firewall prompt on Anki startup because AnkiConnect runs a local HTTP server | Verified — AnkiConnect README ("firewall nag dialog box") |
+| No authentication on the AnkiConnect API by default | Verified — AnkiConnect README; `apiKey` support is off unless set |
+| `updateNoteFields` fails when the note is open in Anki's Browser | Verified — AnkiConnect README and anki-mcp-server README |
+| MCP server requires Node.js ≥ 22.12.0 | Verified — npm registry `engines` field (`>=22.12.0`) and project README |
+| Node 20 reached end-of-life 2026-04-30 | Verified — `nodejs/Release` `schedule.json` |
+| Node 24.x is the current Active LTS | Verified — `schedule.json`: LTS 2025-10-28, maintenance not until 2026-10-20 |
+| MCPB install route, `%APPDATA%\Claude\claude_desktop_config.json`, npx `--stdio` config shape, `--read-only` | Verified — project README |
+| MCP server exposes **50** tools (39 essential + 11 GUI) | Verified — project README. **Corrected from 42** |
+| MCP server runs locally, no telemetry | Verified — project privacy policy, for local-only mode. The opt-in SaaS tunnel, Hosted Anki and media library do transmit data |
+| Kolibri Windows `.exe` bundles Python 3, serves `127.0.0.1:8080`, firewall prompt for the Python process | Verified — Kolibri user guide, Windows install page |
+| Kolibri current release **0.19.5**, published 2026-07-14 | Verified — learningequality.org download page |
+| Import path `Device → Channels → Import → Kolibri Studio` | Verified — Kolibri user guide, resource management page |
+| Channels exist: Khan Academy, Open Stax, CK-12, Blockly Games, EngageNY | Verified — Kolibri public channel catalogue API; all five returned, English entries only. Note the catalogue spells it `Open Stax` |
+| Ukrainian / Russian localized channel coverage | **Unverified** — the catalogue API ignored the `languages` filter, so localized coverage could not be established |
+| FSRS is enabled in deck options, **FSRS** section at the bottom | Verified — Anki manual, deck options page. **Corrected from `Tools → Preferences → Review`** |
+| Windows log path `%APPDATA%\Claude\logs\` | **Unverified** — the project README documents only the macOS path `~/Library/Logs/Claude/` |
 
-The MCP server is at **0.22.0 and self-described as beta**, with breaking changes
-permitted under 0.x versioning. Pin the version if this setup needs to be stable
-for months rather than weeks.
+The npm `latest` tag is **0.25.0**. The project README still says 0.22.0 and
+describes itself as beta, with breaking changes permitted under 0.x versioning —
+treat the README's version number as stale and the registry as authoritative.
+Pin the version if this setup needs to be stable for months rather than weeks.
+
+Two sourcing notes for this run:
+
+| Source | Note |
+|---|---|
+| AnkiConnect README | `git.sr.ht` returned HTTP 502 on every path throughout this run. The README was read from an Internet Archive snapshot dated 2026-08-29 — the project's own text, but not fetched live |
+| Anki manual | Consulted for the current release; FSRS wording has changed across Anki versions before and may change again |
