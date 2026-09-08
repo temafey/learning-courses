@@ -1,0 +1,228 @@
+// Computes points from session logs and writes state/points.md.
+//
+// The model records what happened; this script decides what it is worth.
+// Nothing here reads a model's opinion — only the JSON blocks in logs/.
+//
+// Usage: npm run tally
+
+import { readdir, readFile, writeFile } from 'node:fs/promises'
+import { join, dirname } from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const ROOT = join(dirname(fileURLToPath(import.meta.url)), '..')
+const LOGS = join(ROOT, 'logs')
+const OUT = join(ROOT, 'state', 'points.md')
+const HISTORY = join(ROOT, 'rewards', 'history.md')
+
+// Point values. Mirrors docs/engagement-system.md §6 — change both together.
+const POINTS = {
+  lessonCompleted: 10,
+  ankiMorning: 5,
+  attempt: 3,
+  solved: 5,
+  defended: 2,
+  bossAttempted: 5,
+  bossSolved: 5,
+  gapClosed: 10,
+  feedback: 2,
+  bankedDayBonus: 0.1,
+}
+
+const LOG_NAME = /^(\d{4})-(\d{2})-(\d{2})-([a-z]+)\.md$/
+
+/** Pulls the first ```json fence out of a markdown file. */
+function extractJson(text, file) {
+  const match = text.match(/```json\s*\n([\s\S]*?)\n\s*```/)
+  if (!match) return null
+  try {
+    return JSON.parse(match[1])
+  } catch (err) {
+    console.warn(`  skipped ${file}: JSON block is not valid — ${err.message}`)
+    return null
+  }
+}
+
+function scoreSession(s) {
+  let n = 0
+  if (s.completed) n += POINTS.lessonCompleted
+  if (s.anki_morning_done) n += POINTS.ankiMorning
+  for (const t of s.tasks ?? []) {
+    if (t.attempted) n += POINTS.attempt
+    if (t.solved) n += POINTS.solved
+    if (t.defended) n += POINTS.defended
+  }
+  if (s.boss?.attempted) n += POINTS.bossAttempted
+  if (s.boss?.solved) n += POINTS.bossSolved
+  n += (s.gaps_closed?.length ?? 0) * POINTS.gapClosed
+  const f = s.feedback
+  if (f && f.clear && f.interesting && f.tone) n += POINTS.feedback
+  return Math.round(n * (s.multiplier ?? 1))
+}
+
+/** ISO-8601 week number, so weeks match what a calendar shows. */
+function isoWeek(date) {
+  const d = new Date(Date.UTC(date.slice(0, 4), +date.slice(5, 7) - 1, date.slice(8, 10)))
+  const day = d.getUTCDay() || 7
+  d.setUTCDate(d.getUTCDate() + 4 - day)
+  const start = new Date(Date.UTC(d.getUTCFullYear(), 0, 1))
+  const week = Math.ceil(((d - start) / 86400000 + 1) / 7)
+  return `${d.getUTCFullYear()}-W${String(week).padStart(2, '0')}`
+}
+
+// Calendar quarters, not school terms. Adjust here if the school year differs.
+const quarterOf = (date) => `${date.slice(0, 4)}-Q${Math.ceil(+date.slice(5, 7) / 3)}`
+
+async function collect() {
+  let files
+  try {
+    files = await readdir(LOGS)
+  } catch {
+    return { sessions: [], days: new Map() }
+  }
+  const sessions = []
+  const days = new Map()
+  for (const file of files.sort()) {
+    if (!LOG_NAME.test(file)) continue
+    const data = extractJson(await readFile(join(LOGS, file), 'utf8'), file)
+    if (!data) continue
+    if (data.type === 'day') days.set(data.date, data)
+    else if (data.type === 'session') sessions.push({ ...data, file })
+  }
+  return { sessions, days }
+}
+
+async function claims() {
+  try {
+    const data = extractJson(await readFile(HISTORY, 'utf8'), 'rewards/history.md')
+    return data?.claims ?? []
+  } catch {
+    return []
+  }
+}
+
+function streakFrom(byDate, days) {
+  const dates = [...byDate.keys()].sort().reverse()
+  if (dates.length === 0) return 0
+  let streak = 0
+  let cursor = new Date(`${dates[0]}T00:00:00Z`)
+  for (;;) {
+    const key = cursor.toISOString().slice(0, 10)
+    const worked = byDate.has(key)
+    const frozen = days.get(key)?.streak_freeze_used === true
+    if (!worked && !frozen) break
+    if (worked) streak += 1
+    cursor.setUTCDate(cursor.getUTCDate() - 1)
+  }
+  return streak
+}
+
+function sumBy(byDate, keyOf) {
+  const totals = new Map()
+  for (const [date, points] of byDate) {
+    const key = keyOf(date)
+    totals.set(key, (totals.get(key) ?? 0) + points)
+  }
+  return totals
+}
+
+function table(rows, head) {
+  if (rows.length === 0) return '_Порожньо._\n'
+  return [`| ${head.join(' | ')} |`, `|${head.map(() => '---').join('|')}|`, ...rows]
+    .join('\n')
+    .concat('\n')
+}
+
+const { sessions, days } = await collect()
+const granted = (await claims()).filter((c) => c.status === 'granted')
+
+const byDate = new Map()
+for (const s of sessions) {
+  byDate.set(s.date, (byDate.get(s.date) ?? 0) + scoreSession(s))
+}
+// A day the student chose not to spend earns a bonus for waiting.
+for (const [date, points] of byDate) {
+  if (days.get(date)?.claim === 'banked') {
+    byDate.set(date, Math.round(points * (1 + POINTS.bankedDayBonus)))
+  }
+}
+
+const earned = [...byDate.values()].reduce((a, b) => a + b, 0)
+const spent = granted.reduce((a, c) => a + (c.points ?? 0), 0)
+const weeks = sumBy(byDate, isoWeek)
+const months = sumBy(byDate, (d) => d.slice(0, 7))
+const quarters = sumBy(byDate, quarterOf)
+
+const generated = new Date().toISOString().slice(0, 10)
+const md = `# Points
+
+Generated by \`scripts/tally.mjs\` on ${generated}. Do not edit — the next
+tally overwrites this file. To correct a number, fix the log it came from.
+
+| Metric | Value |
+|---|---|
+| Earned, all time | ${earned} |
+| Spent | ${spent} |
+| **Balance** | **${earned - spent}** |
+| Sessions logged | ${sessions.length} |
+| Current streak | ${streakFrom(byDate, days)} |
+
+## By day
+
+${table(
+  [...byDate.entries()]
+    .sort()
+    .reverse()
+    .slice(0, 21)
+    .map(([date, points]) => {
+      const banked = days.get(date)?.claim === 'banked' ? 'так' : '—'
+      return `| ${date} | ${points} | ${banked} |`
+    }),
+  ['Дата', 'Бали', 'Відкладено (+10%)']
+)}
+## By week
+
+${table(
+  [...weeks.entries()].sort().reverse().map(([k, v]) => `| ${k} | ${v} |`),
+  ['Тиждень', 'Зароблено']
+)}
+## By month
+
+${table(
+  [...months.entries()].sort().reverse().map(([k, v]) => `| ${k} | ${v} |`),
+  ['Місяць', 'Зароблено']
+)}
+## By quarter
+
+${table(
+  [...quarters.entries()].sort().reverse().map(([k, v]) => `| ${k} | ${v} |`),
+  ['Чверть', 'Зароблено']
+)}
+## Rewards granted
+
+${table(
+  granted.map((c) => `| ${c.date} | ${c.period} | ${c.item} | ${c.points ?? 0} |`),
+  ['Дата', 'Період', 'Нагорода', 'Бали']
+)}
+## Formula
+
+Tiers are keyed to **earned** in a period; only the balance is spendable, so
+buying something on Friday never costs the guaranteed monthly reward.
+
+| Event | Points |
+|---|---|
+| Lesson completed | ${POINTS.lessonCompleted} |
+| Morning Anki cards cleared | ${POINTS.ankiMorning} |
+| Genuine attempt, even wrong | ${POINTS.attempt} |
+| Problem solved, hints or not | ${POINTS.solved} |
+| Defense question answered | ${POINTS.defended} |
+| Boss attempted / solved | ${POINTS.bossAttempted} / +${POINTS.bossSolved} |
+| Topic stopped failing in Anki | ${POINTS.gapClosed} |
+| End-of-lesson feedback | ${POINTS.feedback} |
+| Banked day | +${POINTS.bankedDayBonus * 100}% |
+`
+
+await writeFile(OUT, md, 'utf8')
+console.log(
+  `tally: ${sessions.length} session(s), ${byDate.size} day(s), ` +
+    `earned ${earned}, balance ${earned - spent} → state/points.md`
+)

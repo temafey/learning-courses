@@ -17,19 +17,38 @@ test suite and no package manager. Occasional scripts may be added under
 |---|---|
 | `docs/` | Setup runbooks and technical guides (English) |
 | `tasks/` | Ordered installation/setup work items with status (English) |
-| `curriculum/` | Subject plans and lesson sequences (Ukrainian) |
-| `decks/` | Anki deck sources and card drafts (Ukrainian) |
-| `logs/` | Session logs and progress notes |
-| `scripts/` | Any automation (deck generation, exports) |
+| `prompts/` | Claude Desktop project instructions, ready to paste (English wrapper, Ukrainian output) |
+| `state/` | What the system remembers between chats: the day, the profile, points, aspirations |
+| `logs/` | Session and day logs, append-only, each with a JSON block |
+| `rewards/` | Catalogue, proposals and grant history |
+| `curriculum/` | Subject plans, the «навіщо» tables, directions and the emphasis plan (Ukrainian) |
+| `decks/` | Anki deck sources, card drafts and per-subject styling (Ukrainian) |
+| `scripts/` | Automation — currently `tally.mjs`, which computes points from the logs |
 
-Only `docs/` and `tasks/` exist today. Create the others as needed rather
-than up front; do not scatter content at the repository root.
+`curriculum/`, `decks/` and anything else the student reads is Ukrainian; the
+rest is English. Do not scatter content at the repository root.
+
+`state/`, `logs/`, `rewards/`, `prompts/` and `curriculum/` are the five
+folders exposed to Claude Desktop through the filesystem MCP server. Anything
+written there is writable from a tutoring session; `docs/`, `tasks/` and
+`.claude/` deliberately are not. Adding a sixth content folder means updating
+`tasks/13-filesystem-mcp.md` and the server's argument list, so prefer a
+subfolder of an existing one.
+
+Two rules the design depends on: **only `scripts/tally.mjs` writes
+`state/points.md`**, and **logs are append-only** — a correction is a new line,
+never an edit to a past log.
 
 `tasks/` is the execution side of `docs/`. Each task file carries a status, a
 **Done when** checklist and a **Record** table of what the machine actually
 did; `tasks/12-doc-feedback.md` is how those observations get folded back into
 the guides, including the claims still marked unverified. Start at
 `tasks/README.md`.
+
+The two anchor documents are `docs/learning-stack-windows11-install.md` (the
+stack) and `docs/engagement-system.md` (how a lesson is themed, scored,
+rewarded and justified to the student). Change either only through a task, so
+the change carries evidence.
 
 ## Language policy
 

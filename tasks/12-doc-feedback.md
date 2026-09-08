@@ -3,8 +3,8 @@
 | Field | Value |
 |---|---|
 | Status | `todo` |
-| Depends on | 01–11 |
-| Guide section | all of `docs/learning-stack-windows11-install.md` |
+| Depends on | 01–11, 13–18 |
+| Guide section | all of `docs/` |
 | Estimated time | 30 min |
 
 ## Goal
@@ -15,7 +15,7 @@ twelve **Record** tables.
 
 ## Steps
 
-1. Read the **Record** and **Notes** sections of tasks 01–11 end to end.
+1. Read the **Record** and **Notes** sections of every other task end to end.
 2. Update §8, the verification status table:
 
    | Claim | Settled by |
@@ -26,6 +26,12 @@ twelve **Record** tables.
    Move each to `Verified — observed on this machine, <date>` with what was
    actually seen, or leave it unverified with a better-stated reason. Re-date
    the section header.
+
+   Then do the same for `docs/engagement-system.md` §13. Task 13 settles how
+   the filesystem server behaves, task 17 settles the note-type route and the
+   `{{Field}}` question, task 18 settles whether the «навіщо» rows match the
+   textbook, and two weeks of logs settle whether the behavioural flags in §8
+   really stand in for a stopwatch.
 3. Correct any step whose UI path, version number or behaviour diverged from
    what the guide says. Follow the existing correction style — the FSRS
    blockquote in §3.1 is the model: state what the old text said, why it was
@@ -45,7 +51,7 @@ twelve **Record** tables.
 - [ ] Every task's **Notes** has been folded in or explicitly dismissed
 - [ ] Every problem actually hit has a §7 row
 - [ ] `npm run lint` passes
-- [ ] All twelve tasks in `README.md` read `done`
+- [ ] Every task in `README.md` reads `done`
 
 ## Record
 

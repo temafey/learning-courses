@@ -1,0 +1,60 @@
+/* Space theme — paste into Cards... -> Styling of one note type.
+   Quiet on purpose: the card is read in four seconds, and decoration that
+   competes with the text costs recall. */
+
+.card {
+  font-family: "Segoe UI", system-ui, sans-serif;
+  font-size: 22px;
+  line-height: 1.5;
+  text-align: center;
+  color: #1a1d29;
+  background: radial-gradient(ellipse at top, #eef1f8 0%, #dfe4f0 100%);
+  padding: 24px 18px;
+}
+
+/* Question and answer are separated by an <hr id=answer> in the template. */
+#answer {
+  border: none;
+  border-top: 1px solid #b9c0d4;
+  margin: 20px auto;
+  width: 60%;
+}
+
+.card b,
+.card strong {
+  color: #2b3a67;
+}
+
+.card code {
+  font-family: Consolas, "Courier New", monospace;
+  font-size: 0.9em;
+  background: #ffffff80;
+  padding: 1px 5px;
+  border-radius: 3px;
+}
+
+/* Anki toggles .nightMode on the same element, so the dark palette is a
+   straight override rather than a separate sheet. */
+.card.nightMode {
+  color: #e8ecf7;
+  background: radial-gradient(ellipse at top, #171a2b 0%, #0b0d17 100%);
+}
+
+.card.nightMode #answer {
+  border-top-color: #3a4160;
+}
+
+.card.nightMode b,
+.card.nightMode strong {
+  color: #9fb4ef;
+}
+
+.card.nightMode code {
+  background: #ffffff14;
+}
+
+/* Phones get the same card at a readable size. */
+.mobile .card {
+  font-size: 24px;
+  padding: 16px 12px;
+}
